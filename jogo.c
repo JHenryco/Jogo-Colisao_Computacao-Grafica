@@ -19,6 +19,7 @@ int carLane;
 int carX;
 int score;
 bool gameover;
+float objectSpeed = 5.0;
 
 typedef struct {
     int x;
@@ -92,7 +93,7 @@ void update(int value) {
         for (i = 0; i < MAX_OBJECTS; i++) {
             Object *object = &objects[i];
             if (object->active) {
-                object->y -= 5;
+                object->y -= objectSpeed;//velocidade dos objetos
 
                 // Check for collision
                 if (object->x < carX + CAR_WIDTH &&
@@ -110,7 +111,10 @@ void update(int value) {
                 }
             }
         }
-
+        if(!(score%8)){
+        	objectSpeed += 0.05; //Aumenta a veocidade ao poucos
+		}
+		
         // Generate new objects
         for (i = 0; i < MAX_OBJECTS; i++) {
             if (!objects[i].active) {
