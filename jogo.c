@@ -333,6 +333,8 @@ int main() {
     
 	inicialize();
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+    glutInitWindowPosition(630,240);//fullhd
+    //glutInitWindowPosition(310,60);//hd
     glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
     glutCreateWindow("Corrida de Carro");
     glutDisplayFunc(display);
