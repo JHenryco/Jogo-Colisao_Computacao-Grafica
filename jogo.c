@@ -20,6 +20,7 @@ int carX;
 int score;
 bool gameover;
 float objectSpeed = 5.0;
+float centerLineOffset = 0.0;
 
 typedef struct {
     int x;
@@ -62,6 +63,37 @@ void drawLanes() {
         glEnd();
     }
 }
+void drawCenterLines() {
+    glColor3f(1.0, 1.0, 1.0);
+    glLineWidth(3.0);
+    glEnable(GL_LINE_SMOOTH);
+
+    // Defina o comprimento dos segmentos de linha e dos espaços vazios
+    float lineSegmentLength = 80.0;
+    float spaceSegmentLength = 200.0;
+	
+	int i;
+    for (i = 0; i < 3; i++) {
+        int laneX = i * (LANE_WIDTH + LANE_SPACING) + LANE_WIDTH / 2;
+
+        // Desenhe as linhas descontínuas
+        float currentPosition = centerLineOffset;
+        while (currentPosition < WINDOW_HEIGHT) {
+            // Desenhe um segmento de linha
+            glBegin(GL_LINES);
+            glVertex2f(laneX, currentPosition);
+            glVertex2f(laneX, currentPosition + lineSegmentLength);
+            glEnd();
+
+            // Atualize a posição atual para o próximo espaço vazio
+            currentPosition += lineSegmentLength + spaceSegmentLength;
+        }
+    }
+
+    glDisable(GL_LINE_SMOOTH);
+}
+
+
 
 void drawScore() {
     glColor3f(1.0, 1.0, 1.0);
@@ -113,7 +145,10 @@ void update(int value) {
         }
         if(!(score%8)){
         	objectSpeed += 0.05; //Aumenta a veocidade ao poucos
+        	//centerLineOffset -= objectSpeed;
+
 		}
+		centerLineOffset -= objectSpeed;
 		
         // Generate new objects
         for (i = 0; i < MAX_OBJECTS; i++) {
@@ -165,7 +200,9 @@ void display() {
     glClear(GL_COLOR_BUFFER_BIT);
 
     if (!gameover) {
+    	//centerLineOffset -= objectSpeed;
         drawLanes();
+        drawCenterLines();
         int i;
         for (i = 0; i < MAX_OBJECTS; i++) {
             if (objects[i].active) {
