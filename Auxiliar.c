@@ -117,12 +117,19 @@ void drawGameOver() {
     for (i = 0; i < length; i++) {
         glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, gameOverText[i]);
     }
+    glRasterPos2f(WINDOW_WIDTH / 2 - 60, WINDOW_HEIGHT / 2 - 30);
+    gameOverText[20];
+    sprintf(gameOverText, "Score: %d", score);
+    length = strlen(gameOverText);
+    for (i = 0; i < length; i++) {
+        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, gameOverText[i]);
+    }
 }
 
 void drawInstructions() {
     glColor3f(1.0, 1.0, 1.0);
     glRasterPos2f(WINDOW_WIDTH / 2 - 120, WINDOW_HEIGHT / 2);
-    char instructionsText[100] = "Instructions:\n\nUse the left and right arrow keys to move the car.\nAvoid colliding with the green objects.\nScore points by passing the objects.";
+    char instructionsText[200] = "Instructions:\n\nUse the left and right arrow keys to move the car.\nAvoid colliding with the green objects.\nScore points by passing the objects.";
     int length = strlen(instructionsText);
     int i;
     for (i = 0; i < length; i++) {
@@ -222,9 +229,11 @@ void display() {
         }
         drawCar();
         drawScore();
-    } else if (gameover) {
+    }
+	if (gameover) {
         drawGameOver();
-    } else if (instructionsDisplayed) {
+    }
+	if (instructionsDisplayed) {
         drawInstructions();
     }
 
@@ -261,6 +270,7 @@ void menu(int choice) {
         case 1:
             gameStarted = true;
             gameover = false;
+            instructionsDisplayed = false;
             score = 0;
             objectSpeed = 5.0;
             centerLineOffset = 0.0;
@@ -271,6 +281,8 @@ void menu(int choice) {
             break;
         case 2:
             instructionsDisplayed = true;
+            gameStarted = false;
+            gameover = false;
             break;
     }
 }
