@@ -33,6 +33,16 @@ typedef struct {
 
 Object objects[MAX_OBJECTS];
 
+void drawText(float x, float y, const char *text) {
+    glColor3f(1.0, 1.0, 1.0);
+    glRasterPos2f(x, y);
+    int length = strlen(text);
+    int i;
+    for (i = 0; i < length; i++) {
+        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, text[i]);
+    }
+}
+
 void drawCar() {
     glColor3f(1.0, 0.0, 0.0);
     glBegin(GL_QUADS);
@@ -71,7 +81,7 @@ void drawCenterLines() {
     glLineWidth(3.0);
     glEnable(GL_LINE_SMOOTH);
 
-    // Defina o comprimento dos segmentos de linha e dos espaços vazios
+    // Define o comprimento dos segmentos de linha e dos espaços vazios
     float lineSegmentLength = 80.0;
     float spaceSegmentLength = 200.0;
 
@@ -79,16 +89,16 @@ void drawCenterLines() {
     for (i = 0; i < 3; i++) {
         int laneX = i * (LANE_WIDTH + LANE_SPACING) + LANE_WIDTH / 2;
 
-        // Desenhe as linhas descontínuas
+        // Desenha as linhas descontínuas
         float currentPosition = centerLineOffset;
         while (currentPosition < WINDOW_HEIGHT) {
-            // Desenhe um segmento de linha
+            // Desenha um segmento de linha
             glBegin(GL_LINES);
             glVertex2f(laneX, currentPosition);
             glVertex2f(laneX, currentPosition + lineSegmentLength);
             glEnd();
 
-            // Atualize a posição atual para o próximo espaço vazio
+            // Atualiza a posição atual para o proximo espaço vazio
             currentPosition += lineSegmentLength + spaceSegmentLength;
         }
     }
@@ -97,56 +107,47 @@ void drawCenterLines() {
 }
 
 void drawScore() {
-    glColor3f(1.0, 1.0, 1.0);
-    glRasterPos2f(10, WINDOW_HEIGHT - 20);
-    char scoreText[20];
+	char scoreText[20];
     sprintf(scoreText, "Score: %d", score);
-    int length = strlen(scoreText);
-    int i;
-    for (i = 0; i < length; i++) {
-        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, scoreText[i]);
-    }
+	drawText(10, WINDOW_HEIGHT - 20, scoreText);
+
 }
 
 void drawGameOver() {
-    glColor3f(1.0, 1.0, 1.0);
-    glRasterPos2f(WINDOW_WIDTH / 2 - 80, WINDOW_HEIGHT / 2);
-    char gameOverText[20] = "Game Over";
-    int length = strlen(gameOverText);
-    int i;
-    for (i = 0; i < length; i++) {
-        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, gameOverText[i]);
-    }
-    glRasterPos2f(WINDOW_WIDTH / 2 - 60, WINDOW_HEIGHT / 2 - 30);
-    gameOverText[20];
-    sprintf(gameOverText, "Score: %d", score);
-    length = strlen(gameOverText);
-    for (i = 0; i < length; i++) {
-        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, gameOverText[i]);
-    }
+	char scoreText[20];
+    drawText(WINDOW_WIDTH / 2 - 80, WINDOW_HEIGHT / 2, "Game Over");
+
+    sprintf(scoreText, "Score: %d", score);
+	drawText(WINDOW_WIDTH / 2 - 60, WINDOW_HEIGHT / 2 - 30, scoreText);
 }
 
+
 void drawInstructions() {
-    glColor3f(1.0, 1.0, 1.0);
-    glRasterPos2f(WINDOW_WIDTH / 2 - 120, WINDOW_HEIGHT / 2);
-    char instructionsText[200] = "Instructions:\n\nUse the left and right arrow keys to move the car.\nAvoid colliding with the green objects.\nScore points by passing the objects.";
-    int length = strlen(instructionsText);
-    int i;
-    for (i = 0; i < length; i++) {
-        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, instructionsText[i]);
-    }
+    
+    drawText(WINDOW_WIDTH / 2 - 80, WINDOW_HEIGHT / 2 + 240, "Instrucoes:");
+    
+    drawText(20, WINDOW_HEIGHT / 2 + 180, "1. Use as setas da esquerda e direita para se movimentar entre");
+    drawText(45, WINDOW_HEIGHT / 2 + 150, "as pistas!");
+    drawText(20, WINDOW_HEIGHT / 2 + 120, "2. Evite colidir com os objetos na pista!");
+    drawText(20, WINDOW_HEIGHT / 2 + 90, "3. Voce ganha pontos ao passar pelos objetos!");
+    drawText(20, WINDOW_HEIGHT / 2 + 60, "4. Clique com o botao direito do mouse para acessar o menu!");
+    
+    drawText(20,80, "Atividade 3: Jogo de Corrida");
+    drawText(20,50, "Criado por:");
+    drawText(20,20, "Juan Henryco e Fabiano Landim");
+    
 }
 
 void update(int value) {
     if (!gameover && gameStarted) {
-        // Update the objects
+        // atualiza os objetos
         int i;
         for (i = 0; i < MAX_OBJECTS; i++) {
             Object *object = &objects[i];
             if (object->active) {
                 object->y -= objectSpeed; //velocidade dos objetos
 
-                // Check for collision
+                // Verifica colisao
                 if (object->x < carX + CAR_WIDTH &&
                     object->x + OBJECT_WIDTH > carX &&
                     object->y < 20 + CAR_HEIGHT &&
@@ -155,7 +156,7 @@ void update(int value) {
                     break;
                 }
 
-                // Check if object is off the screen
+                // Olha se o objeto esta fora da tela
                 if (object->y < -OBJECT_HEIGHT) {
                     object->active = false;
                     score++;
@@ -168,12 +169,12 @@ void update(int value) {
         }
         centerLineOffset -= objectSpeed;
 
-        // Generate new objects
+        // Cria novos objetos
         for (i = 0; i < MAX_OBJECTS; i++) {
             if (!objects[i].active) {
                 int randomLane = rand() % 3;
 
-                // Check if lane is occupied
+                // vVerifica se a pista esta ocupada
                 bool laneOccupied = false;
                 int j;
                 for (j = 0; j < MAX_OBJECTS; j++) {
@@ -183,9 +184,9 @@ void update(int value) {
                     }
                 }
 
-                // If lane is occupied, find an available lane
+                // ISe a pista ja tiver um objeto, procura outra pista
                 if (laneOccupied) {
-                    randomLane = (randomLane + 1) % 3; // Move to the next lane
+                    randomLane = (randomLane + 1) % 3; // Muda para a proxima pista
                     while (randomLane != objects[i].lane) {
                         laneOccupied = false;
                         for (j = 0; j < MAX_OBJECTS; j++) {
@@ -197,7 +198,7 @@ void update(int value) {
                         if (!laneOccupied) {
                             break;
                         }
-                        randomLane = (randomLane + 1) % 3; // Move to the next lane
+                        randomLane = (randomLane + 1) % 3; // Muda para a proxima pista
                     }
                 }
 
@@ -214,9 +215,25 @@ void update(int value) {
     glutTimerFunc(16, update, 0);
 }
 
+void drawWelcomeScreen() {
+    drawText(WINDOW_WIDTH / 2 - 170, WINDOW_HEIGHT / 2 + 60, "Bem-vindo(a) ao jogo de corrida!");
+    drawText(WINDOW_WIDTH / 2 - 170, WINDOW_HEIGHT / 2 , "Para iniciar ou para instrucoes");
+    drawText(WINDOW_WIDTH / 2 - 170, WINDOW_HEIGHT / 2 - 60, "Clique com o botao direito do mouse");
+    
+    drawText(20,80, "Atividade 3: Jogo de Corrida");
+    drawText(20,50, "Criado por:");
+    drawText(20,20, "Juan Henryco e Fabiano Landim");
+    
+    
+}
+
 void display() {
     glClear(GL_COLOR_BUFFER_BIT);
-
+	
+	if (!gameStarted && !instructionsDisplayed && !gameover) {
+        drawWelcomeScreen();
+    }
+	
     if (!gameover && gameStarted) {
         //centerLineOffset -= objectSpeed;
         drawLanes();
@@ -284,6 +301,11 @@ void menu(int choice) {
             gameStarted = false;
             gameover = false;
             break;
+        case 3:
+        	instructionsDisplayed = false;
+            gameStarted = false;
+            gameover = false;
+        	break;
     }
 }
 
@@ -291,11 +313,12 @@ void createMenu() {
     glutCreateMenu(menu);
     glutAddMenuEntry("Iniciar Jogo", 1);
     glutAddMenuEntry("Instruções", 2);
+    glutAddMenuEntry("Menu Principal", 3);
     glutAttachMenu(GLUT_RIGHT_BUTTON);
 }
 
-int main(int argc, char **argv) {
-    srand(time(NULL));
+void inicialize(){
+	srand(time(NULL));
 
     carLane = 1;
     carX = carLane * (LANE_WIDTH + LANE_SPACING) + (LANE_WIDTH - CAR_WIDTH) / 2;
@@ -308,11 +331,14 @@ int main(int argc, char **argv) {
     for (i = 0; i < MAX_OBJECTS; i++) {
         objects[i].active = false;
     }
+}
 
-    glutInit(&argc, argv);
+int main() {
+    
+	inicialize();
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
     glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-    glutCreateWindow("Car Game");
+    glutCreateWindow("Corrida de Carro");
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
     glutSpecialFunc(specialKeyboard);
