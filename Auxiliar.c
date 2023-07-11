@@ -33,6 +33,16 @@ typedef struct {
 
 Object objects[MAX_OBJECTS];
 
+void drawText(float x, float y, const char *text) {
+    glColor3f(1.0, 1.0, 1.0);
+    glRasterPos2f(x, y);
+    int length = strlen(text);
+    int i;
+    for (i = 0; i < length; i++) {
+        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, text[i]);
+    }
+}
+
 void drawCar() {
     glColor3f(1.0, 0.0, 0.0);
     glBegin(GL_QUADS);
@@ -126,6 +136,7 @@ void drawGameOver() {
     }
 }
 
+/*
 void drawInstructions() {
     glColor3f(1.0, 1.0, 1.0);
     glRasterPos2f(WINDOW_WIDTH / 2 - 120, WINDOW_HEIGHT / 2);
@@ -135,6 +146,28 @@ void drawInstructions() {
     for (i = 0; i < length; i++) {
         glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, instructionsText[i]);
     }
+}
+
+void drawText(float x, float y, const char *text) {
+    glColor3f(1.0, 1.0, 1.0);
+    glRasterPos2f(x, y);
+    int length = strlen(text);
+    int i;
+    for (i = 0; i < length; i++) {
+        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, text[i]);
+    }
+}
+
+void drawWelcomeScreen() {
+    drawText(WINDOW_WIDTH / 2 - 170, WINDOW_HEIGHT / 2 + 60, "Bem-vindo(a) ao jogo de corrida!");
+    drawText(WINDOW_WIDTH / 2 - 170, WINDOW_HEIGHT / 2, "Para iniciar ou para instruções");
+    drawText(WINDOW_WIDTH / 2 - 170, WINDOW_HEIGHT / 2 - 60, "Clique com o botão direito do mouse");
+}
+
+
+*/
+void drawInstructions() {
+    drawText(WINDOW_WIDTH / 2 - 120, WINDOW_HEIGHT / 2, "Instructions:\n\nUse the left and right arrow keys to move the car.\nAvoid colliding with the green objects.\nScore points by passing the objects.");
 }
 
 void update(int value) {
@@ -214,9 +247,19 @@ void update(int value) {
     glutTimerFunc(16, update, 0);
 }
 
+void drawWelcomeScreen() {
+    drawText(WINDOW_WIDTH / 2 - 170, WINDOW_HEIGHT / 2 + 60, "Bem-vindo(a) ao jogo de corrida!");
+    drawText(WINDOW_WIDTH / 2 - 170, WINDOW_HEIGHT / 2, "Para iniciar ou para instruções");
+    drawText(WINDOW_WIDTH / 2 - 170, WINDOW_HEIGHT / 2 - 60, "Clique com o botão direito do mouse");
+}
+
 void display() {
     glClear(GL_COLOR_BUFFER_BIT);
-
+	
+	if (!gameStarted && !instructionsDisplayed && !gameover) {
+        drawWelcomeScreen();
+    }
+	
     if (!gameover && gameStarted) {
         //centerLineOffset -= objectSpeed;
         drawLanes();
@@ -284,6 +327,11 @@ void menu(int choice) {
             gameStarted = false;
             gameover = false;
             break;
+        case 3:
+        	instructionsDisplayed = false;
+            gameStarted = false;
+            gameover = false;
+        	break;
     }
 }
 
@@ -291,6 +339,7 @@ void createMenu() {
     glutCreateMenu(menu);
     glutAddMenuEntry("Iniciar Jogo", 1);
     glutAddMenuEntry("Instruções", 2);
+    glutAddMenuEntry("Menu Principal", 3);
     glutAttachMenu(GLUT_RIGHT_BUTTON);
 }
 
