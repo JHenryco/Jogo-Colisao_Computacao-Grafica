@@ -19,6 +19,8 @@ int carLane;
 int carX;
 int score;
 bool gameover;
+bool instructionsDisplayed;
+bool gameStarted;
 float objectSpeed = 5.0;
 float centerLineOffset = 0.0;
 
@@ -53,7 +55,7 @@ void drawObject(int index) {
 
 void drawLanes() {
     glColor3f(0.5, 0.5, 0.5);
-	int i;
+    int i;
     for (i = 0; i < 3; i++) {
         glBegin(GL_QUADS);
         glVertex2f(i * (LANE_WIDTH + LANE_SPACING), 0);
@@ -63,6 +65,7 @@ void drawLanes() {
         glEnd();
     }
 }
+
 void drawCenterLines() {
     glColor3f(1.0, 1.0, 1.0);
     glLineWidth(3.0);
@@ -71,8 +74,8 @@ void drawCenterLines() {
     // Defina o comprimento dos segmentos de linha e dos espaços vazios
     float lineSegmentLength = 80.0;
     float spaceSegmentLength = 200.0;
-	
-	int i;
+
+    int i;
     for (i = 0; i < 3; i++) {
         int laneX = i * (LANE_WIDTH + LANE_SPACING) + LANE_WIDTH / 2;
 
@@ -92,8 +95,6 @@ void drawCenterLines() {
 
     glDisable(GL_LINE_SMOOTH);
 }
-
-
 
 void drawScore() {
     glColor3f(1.0, 1.0, 1.0);
@@ -116,16 +117,34 @@ void drawGameOver() {
     for (i = 0; i < length; i++) {
         glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, gameOverText[i]);
     }
+    glRasterPos2f(WINDOW_WIDTH / 2 - 60, WINDOW_HEIGHT / 2 - 30);
+    gameOverText[20];
+    sprintf(gameOverText, "Score: %d", score);
+    length = strlen(gameOverText);
+    for (i = 0; i < length; i++) {
+        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, gameOverText[i]);
+    }
+}
+
+void drawInstructions() {
+    glColor3f(1.0, 1.0, 1.0);
+    glRasterPos2f(WINDOW_WIDTH / 2 - 120, WINDOW_HEIGHT / 2);
+    char instructionsText[200] = "Instructions:\n\nUse the left and right arrow keys to move the car.\nAvoid colliding with the green objects.\nScore points by passing the objects.";
+    int length = strlen(instructionsText);
+    int i;
+    for (i = 0; i < length; i++) {
+        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, instructionsText[i]);
+    }
 }
 
 void update(int value) {
-    if (!gameover) {
+    if (!gameover && gameStarted) {
         // Update the objects
         int i;
         for (i = 0; i < MAX_OBJECTS; i++) {
             Object *object = &objects[i];
             if (object->active) {
-                object->y -= objectSpeed;//velocidade dos objetos
+                object->y -= objectSpeed; //velocidade dos objetos
 
                 // Check for collision
                 if (object->x < carX + CAR_WIDTH &&
@@ -143,13 +162,12 @@ void update(int value) {
                 }
             }
         }
-        if(!(score%8)){
-        	objectSpeed += 0.05; //Aumenta a veocidade ao poucos
-        	//centerLineOffset -= objectSpeed;
+        if (!(score % 8)) {
+            objectSpeed += 0.05; //Aumenta a veocidade ao poucos
+            //centerLineOffset -= objectSpeed;
+        }
+        centerLineOffset -= objectSpeed;
 
-		}
-		centerLineOffset -= objectSpeed;
-		
         // Generate new objects
         for (i = 0; i < MAX_OBJECTS; i++) {
             if (!objects[i].active) {
@@ -199,8 +217,8 @@ void update(int value) {
 void display() {
     glClear(GL_COLOR_BUFFER_BIT);
 
-    if (!gameover) {
-    	//centerLineOffset -= objectSpeed;
+    if (!gameover && gameStarted) {
+        //centerLineOffset -= objectSpeed;
         drawLanes();
         drawCenterLines();
         int i;
@@ -211,8 +229,12 @@ void display() {
         }
         drawCar();
         drawScore();
-    } else {
+    }
+	if (gameover) {
         drawGameOver();
+    }
+	if (instructionsDisplayed) {
+        drawInstructions();
     }
 
     glutSwapBuffers();
@@ -227,18 +249,49 @@ void reshape(int width, int height) {
 }
 
 void specialKeyboard(int key, int x, int y) {
-    switch (key) {
-        case GLUT_KEY_LEFT:
-            if (carLane > 0)
-                carLane--;
+    if (!instructionsDisplayed && gameStarted) {
+        switch (key) {
+            case GLUT_KEY_LEFT:
+                if (carLane > 0)
+                    carLane--;
+                break;
+            case GLUT_KEY_RIGHT:
+                if (carLane < 2)
+                    carLane++;
+                break;
+        }
+
+        carX = carLane * (LANE_WIDTH + LANE_SPACING) + (LANE_WIDTH - CAR_WIDTH) / 2;
+    }
+}
+
+void menu(int choice) {
+    switch (choice) {
+        case 1:
+            gameStarted = true;
+            gameover = false;
+            instructionsDisplayed = false;
+            score = 0;
+            objectSpeed = 5.0;
+            centerLineOffset = 0.0;
+            int i;
+            for (i = 0; i < MAX_OBJECTS; i++) {
+                objects[i].active = false;
+            }
             break;
-        case GLUT_KEY_RIGHT:
-            if (carLane < 2)
-                carLane++;
+        case 2:
+            instructionsDisplayed = true;
+            gameStarted = false;
+            gameover = false;
             break;
     }
+}
 
-    carX = carLane * (LANE_WIDTH + LANE_SPACING) + (LANE_WIDTH - CAR_WIDTH) / 2;
+void createMenu() {
+    glutCreateMenu(menu);
+    glutAddMenuEntry("Iniciar Jogo", 1);
+    glutAddMenuEntry("Instruções", 2);
+    glutAttachMenu(GLUT_RIGHT_BUTTON);
 }
 
 int main(int argc, char **argv) {
@@ -248,7 +301,10 @@ int main(int argc, char **argv) {
     carX = carLane * (LANE_WIDTH + LANE_SPACING) + (LANE_WIDTH - CAR_WIDTH) / 2;
     score = 0;
     gameover = false;
-	int i;
+    instructionsDisplayed = false;
+    gameStarted = false;
+
+    int i;
     for (i = 0; i < MAX_OBJECTS; i++) {
         objects[i].active = false;
     }
@@ -262,6 +318,8 @@ int main(int argc, char **argv) {
     glutSpecialFunc(specialKeyboard);
     glutTimerFunc(0, update, 0);
     glClearColor(0.0, 0.0, 0.0, 0.0);
+
+    createMenu();
 
     glutMainLoop();
     return 0;
