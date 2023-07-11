@@ -229,6 +229,9 @@ void drawWelcomeScreen() {
 
 void display() {
     glClear(GL_COLOR_BUFFER_BIT);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluOrtho2D(0, WINDOW_WIDTH, 0, WINDOW_HEIGHT);
 	
 	if (!gameStarted && !instructionsDisplayed && !gameover) {
         drawWelcomeScreen();
@@ -257,13 +260,6 @@ void display() {
     glutSwapBuffers();
 }
 
-void reshape(int width, int height) {
-    glViewport(0, 0, width, height);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluOrtho2D(0, width, 0, height);
-    glMatrixMode(GL_MODELVIEW);
-}
 
 void specialKeyboard(int key, int x, int y) {
     if (!instructionsDisplayed && gameStarted) {
@@ -340,7 +336,7 @@ int main() {
     glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
     glutCreateWindow("Corrida de Carro");
     glutDisplayFunc(display);
-    glutReshapeFunc(reshape);
+    //glutReshapeFunc(reshape); falta implementar
     glutSpecialFunc(specialKeyboard);
     glutTimerFunc(0, update, 0);
     glClearColor(0.0, 0.0, 0.0, 0.0);
